@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="fw-bold">Upload Dataset</h2>
+    <p class="text-muted mb-0">Accepted format: CSV matching the Telco Customer Churn columns.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('home') }}">Back to Home</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="dataset" class="form-label">Choose CSV file</label>
+        <input class="form-control" type="file" id="dataset" name="dataset" accept=".csv" required>
+        <div class="form-text">File will be stored at {{ data_path }}</div>
+      </div>
+      <button type="submit" class="btn btn-primary">📤 Upload Dataset</button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">📊 Dataset Stats</h5>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>👥 Total rows</span>
+            <strong class="text-primary">{{ stats.total }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>⚠️ Churned (Yes)</span>
+            <strong class="text-danger">{{ stats.churned }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>📈 Churn %</span>
+            <strong class="text-warning">{{ stats.churn_pct }}%</strong>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">📋 Expected Columns</h5>
+        <p class="small text-muted mb-2">Include these columns with <code>{{ 'Churn' }}</code> as target.</p>
+        <div class="d-flex flex-wrap gap-2">
+          {% for col in expected_columns %}
+            <span class="badge bg-light text-dark border">{{ col }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

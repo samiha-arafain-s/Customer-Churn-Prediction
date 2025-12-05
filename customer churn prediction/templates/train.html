@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="fw-bold">Train Models</h2>
+    <p class="text-muted mb-0">Trains Logistic Regression and Random Forest, evaluates accuracy, and saves the best pipeline.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('home') }}">Back to Home</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="card-title mb-1">Train with current dataset</h5>
+        <p class="small text-muted mb-0">Dataset path: {{ data_path }}</p>
+      </div>
+      <form action="{{ url_for('train_route') }}" method="post">
+        <button type="submit" class="btn btn-success" {% if not data_path.exists() %}disabled{% endif %}>🤖 Start Training</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Latest Metrics</h5>
+        {% if metrics %}
+          <ul class="list-group list-group-flush">
+            {% for model_name, value in metrics.items() %}
+              <li class="list-group-item d-flex justify-content-between">
+                <span>{{ model_name }}</span>
+                <strong>
+                  {% if model_name in ['LogisticRegression', 'RandomForest', 'accuracy'] %}
+                    {{ '%.2f'|format(value * 100) }}%
+                  {% elif model_name == 'saved_model' %}
+                    {{ value }}
+                  {% elif model_name == 'trained_at' %}
+                    {{ value }}
+                  {% else %}
+                    {{ value }}
+                  {% endif %}
+                </strong>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted mb-0">No training run yet. Upload a dataset and click "Start Training".</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Expected Columns</h5>
+        <p class="small text-muted mb-2">Your CSV should include these feature columns plus the target <code>Churn</code>.</p>
+        <div class="d-flex flex-wrap gap-2">
+          {% for col in expected_columns %}
+            <span class="badge bg-light text-dark border">{{ col }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

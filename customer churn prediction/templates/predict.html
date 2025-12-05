@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="fw-bold">Predict Churn</h2>
+    <p class="text-muted mb-0">Use the trained model to predict for a single customer or a CSV file.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('home') }}">Back to Home</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Single Customer Form</h5>
+        <form action="{{ url_for('predict_route') }}" method="post">
+          <input type="hidden" name="prediction_type" value="single">
+          <div class="row g-3">
+            {% for field in predict_fields %}
+              <div class="col-md-6">
+                <label class="form-label" for="{{ field.name }}">{{ field.label }}</label>
+                {% if field.type == 'select' %}
+                  <select class="form-select" id="{{ field.name }}" name="{{ field.name }}" required>
+                    {% for opt in field.options %}
+                      <option value="{{ opt }}">{{ opt }}</option>
+                    {% endfor %}
+                  </select>
+                {% else %}
+                  <input class="form-control" id="{{ field.name }}" name="{{ field.name }}" type="{{ field.type }}" placeholder="{{ field.placeholder or '' }}" required>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          <button type="submit" class="btn btn-primary mt-3">🔮 Predict Churn</button>
+        </form>
+        {% if single_result %}
+          <div class="alert {% if single_result.prediction == 1 %}alert-danger{% else %}alert-success{% endif %} mt-3">
+            <div class="fw-bold fs-5">
+              {% if single_result.prediction == 1 %}
+                ⚠️ Prediction: <span class="text-danger">Churn</span>
+              {% else %}
+                ✅ Prediction: <span class="text-success">Stay</span>
+              {% endif %}
+            </div>
+            <div class="mt-2">
+              <strong>Churn Probability:</strong> 
+              <span class="badge {% if single_result.probability > 0.5 %}bg-danger{% else %}bg-success{% endif %}">
+                {{ '%.2f'|format(single_result.probability * 100) }}%
+              </span>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Bulk CSV Prediction</h5>
+        <p class="small text-muted">Upload a CSV with the same feature columns used for training (exclude <code>Churn</code>).</p>
+        <form action="{{ url_for('predict_route') }}" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="prediction_type" value="bulk">
+          <div class="mb-3">
+            <label for="file" class="form-label">CSV File</label>
+            <input class="form-control" type="file" id="file" name="file" accept=".csv" required>
+          </div>
+          <button type="submit" class="btn btn-primary">📤 Upload & Predict</button>
+        </form>
+        {% if bulk_result_path %}
+          <div class="alert alert-success mt-3">
+            Predictions ready. <a href="{{ url_for('download_predictions') }}" class="alert-link">Download CSV</a>
+          </div>
+        {% endif %}
+        <hr>
+        <h6>Expected Feature Columns</h6>
+        <div class="d-flex flex-wrap gap-2">
+          {% for col in expected_columns %}
+            <span class="badge bg-light text-dark border">{{ col }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
